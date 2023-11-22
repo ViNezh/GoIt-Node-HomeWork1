@@ -5,63 +5,36 @@ const { v4: uuidv4 } = require("uuid");
 const contactsPath = path.join(__dirname, "db", "contacts.json");
 
 async function listContacts() {
-  try {
-    const data = await fs.readFile(contactsPath, "utf-8");
-    const contacts = JSON.parse(data);
-    return contacts;
-  } catch (error) {
-    console.error("Error reading contacts:", error.message);
-    return [];
-  }
+  const data = await fs.readFile(contactsPath);
+  const contacts = JSON.parse(data);
+  return contacts;
 }
 
 async function getContactById(contactId) {
-  try {
-    const contacts = await listContacts();
-    const contact = contacts.find((c) => c.id === contactId);
-    return contact || null;
-  } catch (error) {
-    console.error("Error getting contact by ID:", error.message);
-    return null;
-  }
+  const contacts = await listContacts();
+  const contact = contacts.find((c) => c.id === contactId);
+  return contact || null;
 }
 
 async function removeContact(contactId) {
-  try {
-    const contacts = await listContacts();
-    const index = contacts.findIndex((c) => c.id === contactId);
+  const contacts = await listContacts();
+  const index = contacts.findIndex((item) => item.id === contactId);
 
-    if (index !== -1) {
-      const [removedContact] = contacts.splice(index, 1);
-      await fs.writeFile(
-        contactsPath,
-        JSON.stringify(contacts, null, 2),
-        "utf-8"
-      );
-      return removedContact;
-    } else {
-      return null;
-    }
-  } catch (error) {
-    console.error("Error removing contact:", error.message);
+  if (index !== -1) {
+    const [removedContact] = contacts.splice(index, 1);
+    await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
+    return removedContact;
+  } else {
     return null;
   }
 }
 
 async function addContact(name, email, phone) {
-  try {
-    const contacts = await listContacts();
-    const newContact = { id: uuidv4(), name, email, phone };
-    contacts.push(newContact);
-    await fs.writeFile(
-      contactsPath,
-      JSON.stringify(contacts, null, 2),
-      "utf-8"
-    );
-    return newContact;
-  } catch (error) {
-    console.error("Error adding contact:", error.message);
-  }
+  const contacts = await listContacts();
+  const newContact = { id: uuidv4(), name, email, phone };
+  contacts.push(newContact);
+  await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
+  return newContact;
 }
 
 module.exports = {
